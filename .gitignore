@@ -1,3 +1,5 @@
 venv/
 __pycache__/
-
+nltk_data/
+DB/
+help.py
