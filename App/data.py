@@ -19,8 +19,8 @@ class DB:
             CREATE TABLE IF NOT EXISTS {DB_NAME} (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             lemma VARCHAR(31) NOT NULL,
-            form VARCHAR(31) NOT NULL UNIQUE,
-            part_of_speech VARCHAR(31) CHECK (part_of_speech IN ('ADJ', 'ADV', 'NOUN', 'NUM', 'VERB', 'PRON', 'OTHER')),
+            form VARCHAR(31) NOT NULL,
+            part_of_speech VARCHAR(31),
             role VARCHAR(31) 
             );
             """
@@ -29,15 +29,20 @@ class DB:
             f"""
             CREATE INDEX IF NOT EXISTS idx_lemma ON {DB_NAME}(lemma);
             """
+            ) 
+        self.crs.execute(
+            f"""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_all_unique ON {DB_NAME} (lemma, form, part_of_speech, role);
+            """
             )
     
     def __del__(self)-> None:
         if self.conn:
             self.conn.close()
     
-    def execute_query(self, command:str) -> None:
+    def execute_query(self, command:str, params: tuple) -> None:
         try:
-            self.crs.execute(command)
+            self.crs.execute(command, params)
             self.conn.commit()
 
         except sql.Error as e:
