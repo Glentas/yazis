@@ -17,10 +17,19 @@ class DB:
             """
             CREATE TABLE IF NOT EXISTS vocabulary (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            word VARCHAR(31) NOT NULL UNIQUE
+            lemma VARCHAR(31) NOT NULL,
+            form VARCHAR(31) NOT NULL,
+            part_of_speech VARCHAR(31) CHECK (part_of_speech IN ('ADJ', 'ADV', 'NOUN', 'NUM', 'VERB', 'PRON', 'OTHER')),
+            role VARCHAR(31) 
             );
             """
             )
+        self.crs.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_lemma ON vocabulary(lemma);
+            """
+            )
+    
     
     def __del__(self)-> None:
         if self.conn:

@@ -1,19 +1,26 @@
 import os
 import nltk
 import spacy
+from data import DB
 
-def prequisitives():
-    # nlp = spacy.load("en_core_web_sm")
+class Parser:
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    def __init__(self) -> None:
+        self.nlp = spacy.load("en_core_web_sm")
+        self.db = DB()
 
-    nltk_data_path = os.path.join(current_dir, 'nltk_data')
+        current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    nltk.data.path.insert(0, nltk_data_path)
+        nltk_data_path = os.path.join(current_dir, 'nltk_data')
 
-    nltk.download('punkt', download_dir=nltk_data_path)
-    nltk.download('averaged_perceptron_tagger', download_dir=nltk_data_path)
-    nltk.download('wordnet', download_dir=nltk_data_path)
-    nltk.download('omw-1.4', download_dir=nltk_data_path)
+        nltk.data.path.insert(0, nltk_data_path)
 
-prequisitives()
+        nltk.download('punkt', download_dir=nltk_data_path)
+        nltk.download('averaged_perceptron_tagger', download_dir=nltk_data_path)
+        nltk.download('wordnet', download_dir=nltk_data_path)
+        nltk.download('omw-1.4', download_dir=nltk_data_path)
+    
+    def parse(text:str) -> None:
+        pass
+
+
