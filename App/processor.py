@@ -9,9 +9,15 @@ class SQLhelper:
     def select_all(self) -> list[tuple]:
         return self.db.select_query(f"SELECT * from {DB_NAME}")
     
-    def insert(self, values:list[tuple])->None:
+    def insert_records(self, values:list[tuple])->None:
         for v in values:
             self.db.execute_query(f"INSERT OR IGNORE INTO {DB_NAME} (lemma, form, part_of_speech, role) VALUES (?, ?, ?, ?)", v)
+
+    def insert(self, lemma:str, form:str, pos:str, role:str)->None:
+        self.db.execute_query(
+            f"INSERT OR IGNORE INTO {DB_NAME} (lemma, form, part_of_speech, role) VALUES (?, ?, ?, ?)",
+            (lemma, form, pos, role)
+        )
     
     # По айди
     def update(self, id:int, lemma:str, form:str, pos:str, role:str)->None:
@@ -19,6 +25,42 @@ class SQLhelper:
             f"UPDATE {DB_NAME} SET lemma = ?, form = ?, part_of_speech = ?, role = ? WHERE id = ?",
             (lemma, form, pos, role, id)
         )
+
+    def get_by_id(self, id: int):
+        result = self.db.select_query(
+            f"SELECT * FROM {DB_NAME} WHERE id = ?",
+            (id,)
+        )
+        return result[0] if result else None
+
+    def search(self, lemma=None, form=None, pos=None, role=None, id=None):
+        conditions = []
+        params = []
+
+        if lemma:
+            conditions.append("lemma LIKE ?")
+            params.append(f"%{lemma}%")
+        if form:
+            conditions.append("form LIKE ?")
+            params.append(f"%{form}%")
+        if pos:
+            conditions.append("part_of_speech LIKE ?")
+            params.append(f"%{pos}%")
+        if role:
+            conditions.append("role LIKE ?")
+            params.append(f"%{role}%")
+        if id is not None: 
+            conditions.append("id = ?")
+            params.append(id)
+
+        query = f"SELECT * FROM {DB_NAME}"
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+
+        return self.db.select_query(query, tuple(params))
+
+    def delete(self, id:int)->None:
+        self.db.execute_query(f"DELETE FROM {DB_NAME} WHERE id = ?", (id,))
 
 
 class Parser:
@@ -64,7 +106,7 @@ class Parser:
             records.append((lemma, form, pos, role))
 
         if records:
-            self.sql.insert(records)
+            self.sql.insert_records(records)
 
 # tests = "These are my super tests, I guess. Let's check it out! Words are: run, running, ran."
 # Использование:

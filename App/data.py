@@ -49,19 +49,18 @@ class DB:
             print(f"(!) Error: {e}")
             self.conn.rollback()
 
-    def select_query(self, command:str) -> list[tuple]:
-        data:list[tuple] = []
-        if command.strip().upper().startswith("SELECT"):
-
-            try:
-                self.crs.execute(command)
-                data = self.crs.fetchall()
-
-            except sql.Error as e:
-                print(f"(!) Error: {e}")
-                self.conn.rollback()
-        else:
+    def select_query(self, command: str, params: tuple = ()) -> list[tuple]:
+        data: list[tuple] = []
+        if not command.strip().upper().startswith("SELECT"):
             print("Incorrect 'SELECT' query")
+            return data
+
+        try:
+            self.crs.execute(command, params)
+            data = self.crs.fetchall()
+        except sql.Error as e:
+            print(f"(!) Error: {e}")
+            self.conn.rollback()
 
         return data
         
