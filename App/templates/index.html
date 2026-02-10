@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Загрузка текста</h2>
-<p>Вставь текст в поле ниже или загрузи .txt-файл.</p>
+<p>Вставьте текст в поле ниже или загрузите .txt или .rtf файл.</p>
 
 <form method="POST" action="{{ url_for('parse') }}" enctype="multipart/form-data">
     <div class="mb-3">
@@ -10,8 +10,8 @@
         <textarea name="text" class="form-control" rows="6" placeholder="Например: The cat runs quickly..."></textarea>
     </div>
     <div class="mb-3">
-        <label class="form-label">Или загрузи файл (.txt):</label>
-        <input type="file" name="file" class="form-control" accept=".txt">
+        <label class="form-label">Или загрузите файл (.txt или .rtf):</label>
+        <input type="file" name="file" class="form-control" accept=".txt,.rtf">
     </div>
     <button type="submit" class="btn btn-primary">Обработать</button>
 </form>

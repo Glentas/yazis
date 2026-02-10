@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, render_template, redirect, url_for, flash
 from processor import Parser, SQLhelper
+from striprtf.striprtf import rtf_to_text
 
 UPLOAD_FOLDER = 'uploads'
 
@@ -13,6 +14,7 @@ app.secret_key = 'supersecretkey123'
 
 @app.route('/')
 def index():
+    db = SQLhelper()
     return render_template('index.html')
 
 
@@ -21,28 +23,33 @@ def parse():
     input_ = request.form.get('text', '').strip()
     file = request.files.get('file')
 
-    text = None
+    text = ""
 
     if input_:
         text = input_
-    elif file:
-        if not file.filename.endswith('.txt'):
-            flash("Работа осуществляется только с файлами форматов .txt и .rtf", "error")
+    if file:
+        if not file.filename.endswith(('.txt', '.rtf')):
+            flash("Работа осуществляется только с файлами форматов .txt и .rtf!", "error")
             return redirect(url_for('index'))
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                text = f.read()
+            if file.filename.endswith('.txt'):
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    text = f.read()
+            elif file.filename.endswith('.rtf'):
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    rtf_content = f.read()
+                text += " " + rtf_to_text(rtf_content)
         except Exception as e:
             flash(f"Ошибка чтения файла: {e}", "error")
             return redirect(url_for('index'))
-    else:
-        flash("Не был введён текст и не был прикреплён файл", "error")
+    if text == "":
+        flash("Не был введён текст и не был прикреплён файл!", "error")
         return redirect(url_for('index'))
 
     if not text.strip():
-        flash("Прикреплённый файл не содержит текст", "error")
+        flash("Прикреплённый файл не содержит текст!", "error")
         return redirect(url_for('index'))
 
     parser = Parser()
